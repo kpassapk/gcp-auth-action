@@ -1,0 +1,36 @@
+name: 'Authenticate'
+description: 'Authenticate with GCP'
+outputs:
+  access_token:
+    description: |-
+      The Google Cloud access token for calling other Google Cloud APIs.
+    value: ${{ steps.auth.outputs.access_token }}
+
+  access_token_expiration:
+    description: |-
+      The RFC3339 UTC "Zulu" format timestamp for the access token.
+    value: ${{ steps.auth.outputs.access_token_expiration }}
+
+branding:
+  icon: 'lock'
+  color: 'blue'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Get repo name
+      uses: actions/github-script@v6.1.1
+      id: getRepoName
+      with:
+        script: |
+          const repoName = process.env.GITHUB_REPOSITORY
+          const normalizedRepoName = repoName.replace(/^.*\//,'').toLowerCase()
+          core.setOutput('REPO_NAME', normalizedRepoName)
+          console.info(repoName, normalizedRepoName)
+    - id: auth
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        workload_identity_provider: 'projects/498096614925/locations/global/workloadIdentityPools/yalo-github-workflows-pool-2/providers/yalo-github-workflows-provider'
+        service_account: "gh-workflows-${{ steps.getRepoName.outputs.REPO_NAME }}@yalo-production-env.iam.gserviceaccount.com"
+        token_format: 'access_token'
