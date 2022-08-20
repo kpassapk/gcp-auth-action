@@ -24,7 +24,7 @@ runs:
       with:
         script: |
           const repoName = process.env.GITHUB_REPOSITORY
-          const normalizedRepoName = repoName.replace(/^.*\//,'').toLowerCase()
+          const normalizedRepoName = repoName.replace(/^.*\//,'').replace('_', '-').toLowerCase()
           core.setOutput('REPO_NAME', normalizedRepoName)
           console.info(repoName, normalizedRepoName)
     - id: auth
